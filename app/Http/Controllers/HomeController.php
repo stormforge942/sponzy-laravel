@@ -114,13 +114,13 @@ class HomeController extends Controller
       $updates = Updates::where(function ($query) {
         $query->where('user_id', auth()->id())
               ->orWhere(function ($query) {
-                  $query->where('user_id', '!=', auth()->id())
-                        ->where('invisible', false);
+                $query->where('user_id', '!=', auth()->id())
+                      ->where('invisible', 0);
               })
               ->orWhere(function ($query) {
-                  $query->where('user_id', '!=', auth()->id())
-                        ->where('invisible', true)
-                        ->where('created_at', '>=', Carbon::now()->subHours(24));
+                $query->where('user_id', '!=', auth()->id())
+                      ->where('invisible', 1)
+                      ->where('date', '>=', Carbon::now()->subHours(24));
               });
       })->paginate(10);
 
