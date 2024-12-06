@@ -369,57 +369,6 @@ class PaystackController extends Controller
     }
   }
 
-  public function cancelSubscription($id)
-  {
-    $payment = PaymentGateways::whereName('Paystack')->whereEnabled(1)->firstOrFail();
-
-    try {
-      $curl = curl_init();
-
-      curl_setopt_array($curl, array(
-        CURLOPT_URL => "https://api.paystack.co/subscription/" . $id,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-          "Authorization: Bearer " . $payment->key_secret,
-          "Cache-Control: no-cache",
-        ),
-      ));
-
-      $response = curl_exec($curl);
-      $err = curl_error($curl);
-      curl_close($curl);
-
-      if ($err) {
-        throw new \Exception("cURL Error #:" . $err);
-      } else {
-        $result = json_decode($response);
-      }
-
-      // initiate the Library's Paystack Object
-      $paystack = new Paystack($payment->key_secret);
-
-      $paystack->subscription->disable([
-        'code' => $id,
-        'token' => $result->data->email_token
-      ]);
-    } catch (\Exception $e) {
-      session()->put('subscription_cancel', $e->getMessage());
-
-      return back();
-    }
-
-    session()->put('subscription_cancel', __('general.subscription_cancel'));
-
-    \Artisan::call('cache:clear');
-
-    return back();
-  }
-
   public function deletePaymentCard()
   {
     $payment = PaymentGateways::whereName('Paystack')->whereEnabled(1)->firstOrFail();

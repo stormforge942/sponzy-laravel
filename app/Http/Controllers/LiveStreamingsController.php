@@ -61,7 +61,7 @@ class LiveStreamingsController extends Controller
     $live->save();
 
     // Notify to subscribers
-    event(new LiveBroadcasting(auth()->user(), $live->id));
+    // event(new LiveBroadcasting(auth()->user(), $live->id));
 
     return response()->json([
       'success' => true,
@@ -121,7 +121,7 @@ class LiveStreamingsController extends Controller
       ->first();
 
     // Check subscription
-    $checkSubscription = auth()->user()->checkSubscription($creator);
+    $checkSubscription = true;
 
     // Free for paying subscribers
     if (

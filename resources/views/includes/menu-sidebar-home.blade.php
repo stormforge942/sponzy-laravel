@@ -42,12 +42,6 @@
 	</li>
 	@endif
 	<li>
-		<a href="{{ url('my/subscriptions') }}">
-			<i class="bi-person-check"></i>
-			<span class="ml-2">{{ trans('admin.subscriptions') }}</span>
-		</a>
-	</li>
-	<li>
 		<a href="{{ url('my/bookmarks') }}" @if (request()->is('my/bookmarks')) class="active disabled" @endif>
 			<i class="bi-bookmark"></i>
 			<span class="ml-2">{{ trans('general.bookmarks') }}</span>

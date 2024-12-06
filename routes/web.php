@@ -17,7 +17,6 @@ use App\Http\Controllers\RepliesController;
 use App\Http\Controllers\StoriesController;
 use App\Http\Controllers\StripeController; 
 use App\Http\Controllers\UpdatesController;
-use App\Http\Controllers\UpgradeController;
 use App\Http\Controllers\AddFundsController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\MessagesController;
@@ -34,7 +33,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\InstallScriptController;
 use App\Http\Controllers\StripeConnectController;
 use App\Http\Controllers\StripeWebHookController;
-use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\TwoFactorAuthController;
 use App\Http\Controllers\LiveStreamingsController;
 use App\Http\Controllers\StorageCoconutController;
@@ -121,40 +119,7 @@ Route::get('verify/account/{confirmation_code}', [HomeController::class, 'getVer
  Route::get('ajax/user/updates', [HomeController::class, 'ajaxUserUpdates']);
  Route::get('loadmore/comments', [CommentsController::class, 'loadmore']);
 
- /*
-  |-----------------------------------
-  | Subscription
-  |--------- -------------------------
-  */
- Route::get('buy/subscription/success/{user}', function($user) {
-
-	switch (request()->input('delay')) {
-		case 'paypal':
-			$alertDelayPayment = ' <br><br>' . __('general.alert_paypal_delay');
-			break;
-		
-		case 'paystack':
-			$alertDelayPayment = ' <br><br>' . __('general.alert_paystack_delay');
-			break;
-
-		default:
-		$alertDelayPayment = null;
-		break;
-	}
-	
-
-	 session()->put('subscription_success', __('general.subscription_success') . $alertDelayPayment);
-
-	 return redirect($user);
-	 
- 	})->name('subscription.success');
-
- Route::get('buy/subscription/cancel/{user}', function($user){
-	 session()->put('subscription_cancel', __('general.subscription_cancel'));
-	 return redirect($user);
- 	});
-
-	// Stripe Webhook
+ 	// Stripe Webhook
 	Route::post('stripe/webhook', [StripeWebHookController::class, 'handleWebhook']);
 
 	// Paystack Webhook
@@ -197,15 +162,6 @@ Route::get('verify/account/{confirmation_code}', [HomeController::class, 'getVer
 	 // Dashboard
 	 Route::get('dashboard', [UserController::class, 'dashboard']);
 
-	 // Buy Subscription
-	 Route::post('buy/subscription', [SubscriptionsController::class, 'buy']);
-
-	 // Free Subscription
-	 Route::post('subscription/free', [SubscriptionsController::class, 'subscriptionFree']);
-
-	 // Cancel Subscription
-	 Route::post('subscription/free/cancel/{id}', [SubscriptionsController::class, 'cancelFreeSubscription']);
-
 	 // Ajax Request
 	 Route::post('ajax/like', [UserController::class, 'like']);
 	 Route::get('ajax/notifications', [UserController::class, 'ajaxNotifications']);
@@ -228,10 +184,6 @@ Route::get('verify/account/{confirmation_code}', [HomeController::class, 'getVer
    	Route::post('privacy/security', [UserController::class, 'savePrivacySecurity']);
 
 	Route::post('logout/session/{id}',  [UserController::class, 'logoutSession']);
-
-	// Subscription Page
-   	Route::view('settings/subscription','users.subscription');
-   	Route::post('settings/subscription', [UserController::class, 'saveSubscription']);
 
 	// Verify Account
    	Route::get('settings/verify/account', [UserController::class, 'verifyAccount']);
@@ -272,13 +224,6 @@ Route::get('verify/account/{confirmation_code}', [HomeController::class, 'getVer
  	Route::get('settings/password', [UserController::class, 'password']);
  	Route::post('settings/password', [UserController::class, 'updatePassword']);
 
- 	// My subscribers
- 	Route::get('my/subscribers', [UserController::class, 'mySubscribers']);
-
-	// My subscriptions
- 	Route::get('my/subscriptions',[UserController::class, 'mySubscriptions']);
-	Route::post('subscription/cancel/{id}',[UserController::class, 'cancelSubscription']);
-
 	// My payments
 	Route::get('my/payments',[UserController::class, 'myPayments']);
 	Route::get('my/payments/received',[UserController::class, 'myPayments']);
@@ -318,18 +263,6 @@ Route::get('verify/account/{confirmation_code}', [HomeController::class, 'getVer
 	Route::post("paystack/card/authorization", [PaystackController::class, 'cardAuthorization']);
 	Route::get("paystack/card/authorization/verify", [PaystackController::class, 'cardAuthorizationVerify']);
 	Route::post("paystack/delete/card", [PaystackController::class, 'deletePaymentCard']);
-
-	// Cancel Subscription Paystack
-	Route::post('subscription/paystack/cancel/{id}',[PaystackController::class, 'cancelSubscription']);
-
-	// Cancel Subscription Wallet
-	Route::post('subscription/wallet/cancel/{id}',[SubscriptionsController::class, 'cancelWalletSubscription']);
-
-	// Cancel Subscription PayPal
-	Route::post('subscription/paypal/cancel/{id}',[PayPalController::class, 'cancelSubscription']);
-
-	// Cancel Subscription CCBill
-	Route::post('subscription/ccbill/cancel/{id}',[CCBillController::class, 'cancelSubscription']);
 
 	// Pin Post
 	Route::post('pin/post',[UpdatesController::class, 'pinPost']);
@@ -538,8 +471,6 @@ Route::group(['middleware' => 'private.content'], function() {
   */
  Route::group(['middleware' => 'role'], function() {
 
-    // Upgrades
- 	Route::get('update/{version}',[UpgradeController::class, 'update']);
 	Route::post("ajax/upload/image", [AdminController::class, 'uploadImageEditor'])->name('upload.image');
 	Route::get('file/verification/{filename}', [AdminController::class, 'getFileVerification']);
 	Route::post('get/earnings/admin/{range}', [AdminController::class, 'getDataChart'])->name('dashboard.earnings');
@@ -583,10 +514,7 @@ Route::group(['middleware' => 'private.content'], function() {
 		Route::get('/withdrawals', [AdminController::class, 'withdrawals'])->name('withdrawals');
 		Route::get('/withdrawal/{id}', [AdminController::class, 'withdrawalsView'])->name('withdrawals');
 		Route::post('/withdrawals/paid/{id}', [AdminController::class, 'withdrawalsPaid']);
-	
-		// Subscriptions
-		Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
-	
+		
 		// Transactions
 		Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
 		Route::post('/transactions/cancel/{id}', [AdminController::class, 'cancelTransaction']);
@@ -899,7 +827,6 @@ Route::post('webhook/nowpayments', [AddFundsController::class, 'webhookNowpaymen
 // Cardinity
 Route::get('payment/cardinity', [CardinityController::class, 'show'])->name('cardinity');
 Route::post('webhook/cardinity', [CardinityController::class, 'webhook'])->name('webhook.cardinity');
-Route::post('subscription/cardinity/cancel/{id}',[CardinityController::class, 'cancelSubscription']);
 Route::post('webhook/cardinity/cancel', [CardinityController::class, 'cancelPayment'])->name('cardinity.cancel');
 
 // Resize Images

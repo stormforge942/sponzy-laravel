@@ -186,29 +186,6 @@ class PayPalController extends Controller
     }
   } // End methd show
 
-  public function cancelSubscription($id)
-  {
-    $subscription = auth()->user()->userSubscriptions()->whereId($id)->firstOrFail();
-
-    // Init PayPal
-    $provider = new PayPalClient();
-    $token = $provider->getAccessToken();
-    $provider->setAccessToken($token);
-
-    try {
-      $provider->cancelSubscription($subscription->subscription_id, 'Not satisfied with the service');
-
-      $subscription->cancelled = 'yes';
-      $subscription->save();
-    } catch (\Exception $e) {
-    }
-
-    // Wait for the Webhook capture
-    sleep(3);
-
-    return back()->withSubscriptionCancel(__('general.subscription_cancel'));
-  } //<----- End Method cancelSubscription
-
   public function webhook()
   {
     // Get Payment Data

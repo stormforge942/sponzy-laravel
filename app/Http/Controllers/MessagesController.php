@@ -27,61 +27,6 @@ class MessagesController extends Controller
     $this->middleware('auth');
   }
 
-  // Subscribed to your Content
-  protected function subscribedToYourContent($user)
-  {
-    return auth()->user()
-      ->mySubscriptions()
-      ->where('subscriptions.user_id', $user->id)
-      ->where('stripe_id', '=', '')
-      ->where('ends_at', '>=', now())
-      ->whereIn('stripe_price', auth()->user()->plans()->pluck('name'))
-
-      ->orWhere('stripe_status', 'active')
-      ->where('subscriptions.user_id', auth()->id())
-      ->where('stripe_id', '<>', '')
-      ->whereIn('stripe_price', $user->plans()->pluck('name'))
-
-      ->orWhere('stripe_status', 'canceled')
-      ->where('subscriptions.user_id', auth()->id())
-      ->where('ends_at', '>=', now())
-      ->where('stripe_id', '<>', '')
-      ->whereIn('stripe_price', $user->plans()->pluck('name'))
-
-      ->orWhere('stripe_id', '=', '')
-      ->where('stripe_price', $user->plan)
-      ->where('free', '=', 'yes')
-      ->where('subscriptions.user_id', auth()->id())
-      ->first();
-  }
-
-  // Subscribed to my Content
-  protected function subscribedToMyContent($user)
-  {
-    return auth()->user()
-      ->userSubscriptions()
-      ->whereIn('stripe_price', $user->plans()->pluck('name'))
-      ->where('stripe_id', '=', '')
-      ->where('ends_at', '>=', now())
-
-      ->orWhere('stripe_status', 'active')
-      ->where('stripe_id', '<>', '')
-      ->where('user_id', $user->id)
-      ->whereIn('stripe_price', auth()->user()->plans()->pluck('name'))
-
-      ->orWhere('stripe_status', 'canceled')
-      ->where('stripe_id', '<>', '')
-      ->where('user_id', $user->id)
-      ->where('ends_at', '>=', now())
-      ->whereIn('stripe_price', auth()->user()->plans()->pluck('name'))
-
-      ->orWhere('stripe_id', '=', '')
-      ->where('stripe_price', auth()->user()->plan)
-      ->where('free', '=', 'yes')
-      ->whereUserId($user->id)
-      ->first();
-  }
-
   /**
    * Display all messages inbox
    *
@@ -132,17 +77,10 @@ class MessagesController extends Controller
       ->where('status', 'new')
       ->update(['status' => 'readed']);
 
-    // Check if subscription exists
-    $subscribedToYourContent = $this->subscribedToYourContent($user);
-
-    $subscribedToMyContent = $this->subscribedToMyContent($user);
-
     return view('users.messages-show', [
       'messages' => $messages,
       'messagesInbox' => $messagesInbox,
       'user' => $user,
-      'subscribedToYourContent' => $subscribedToYourContent,
-      'subscribedToMyContent' => $subscribedToMyContent
     ]);
   } //<--- End Method messages
 
@@ -690,15 +628,8 @@ class MessagesController extends Controller
   {
     $epub = MediaMessages::with(['messages'])->whereId($id)->firstOrfail();
 
-    $checkUserSubscription = auth()->user()->checkSubscription($epub->messages->user());
-
     if (
-      !$checkUserSubscription
-      && !auth()->user()->checkPayPerViewMsg($epub->messages_id)
-      && $epub->messages->user()->id != auth()->id()
-      || $checkUserSubscription
-      && $epub->messages->price != 0.00
-      && $checkUserSubscription->free == 'yes'
+      $epub->messages->price != 0.00
       && !auth()->user()->checkPayPerViewMsg($epub->messages_id)
     ) {
       abort(404);

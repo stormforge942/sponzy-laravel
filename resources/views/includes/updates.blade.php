@@ -3,7 +3,6 @@
   @foreach ($updates as $response)
 		@php
 			if (auth()->check()) {
-				$checkUserSubscription = auth()->user()->checkSubscription($response->creator);
 				$checkPayPerView = auth()->user()->payPerView()->where('updates_id', $response->id)->first();
 			}
 
@@ -131,20 +130,12 @@
 
 				@if(auth()->check()
 					&& auth()->user()->id != $response->creator->id
-					&& $response->locked == 'yes'
-					&& $checkUserSubscription && $response->price == 0.00
+					&& $response->locked == 'yes' && $response->price == 0.00
 
 					|| auth()->check()
 						&& auth()->user()->id != $response->creator->id
 						&& $response->locked == 'yes'
-						&& $checkUserSubscription
 						&& $response->price != 0.00
-						&& $checkPayPerView
-
-					|| auth()->check()
-						&& auth()->user()->id != $response->creator->id
-						&& $response->price != 0.00
-						&& ! $checkUserSubscription
 						&& $checkPayPerView
 
 					|| auth()->check() && auth()->user()->id != $response->creator->id && auth()->user()->role == 'admin' && auth()->user()->permission == 'all'
@@ -232,10 +223,6 @@
 					<i class="feather icon-lock mr-1"></i>
 
 					@if (auth()->check() && $response->price != 0.00
-							&& $checkUserSubscription
-							&& ! $checkPayPerView
-							|| auth()->check() && $response->price != 0.00
-							&& ! $checkUserSubscription
 							&& ! $checkPayPerView
 						)
 						{{ Helper::formatPrice($response->price) }}
@@ -253,17 +240,10 @@
 	|| $response->locked == 'yes' && $mediaCount != 0
 
 	|| auth()->check() && $response->locked == 'yes'
-	&& $checkUserSubscription
 	&& $response->price == 0.00
 
 	|| auth()->check() && $response->locked == 'yes'
-	&& $checkUserSubscription
 	&& $response->price != 0.00
-	&& $checkPayPerView
-
-	|| auth()->check() && $response->locked == 'yes'
-	&& $response->price != 0.00
-	&& ! $checkUserSubscription
 	&& $checkPayPerView
 
 	|| auth()->check() && auth()->user()->role == 'admin' && auth()->user()->permission == 'all'
@@ -289,21 +269,11 @@
 		@if (auth()->check() && auth()->user()->id == $response->creator->id
 
 		|| auth()->check() && $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price == 0.00
 
 		|| auth()->check() && $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price != 0.00
 		&& $checkPayPerView
-
-		|| auth()->check() && $response->locked == 'yes'
-		&& $response->price != 0.00
-		&& ! $checkUserSubscription
-		&& $checkPayPerView
-
-		|| auth()->check() && auth()->user()->role == 'admin' && auth()->user()->permission == 'all'
-		|| $response->locked == 'no'
 		)
 
 	<div class="btn-block">
@@ -465,17 +435,10 @@
 			if(auth()->check() && auth()->user()->id == $response->creator->id
 
 			|| auth()->check() && $response->locked == 'yes'
-			&& $checkUserSubscription
 			&& $response->price == 0.00
 
 			|| auth()->check() && $response->locked == 'yes'
-			&& $checkUserSubscription
 			&& $response->price != 0.00
-			&& $checkPayPerView
-
-			|| auth()->check() && $response->locked == 'yes'
-			&& $response->price != 0.00
-			&& ! $checkUserSubscription
 			&& $checkPayPerView
 
 			|| auth()->check() && auth()->user()->role == 'admin' && auth()->user()->permission == 'all'
@@ -545,18 +508,11 @@
 
 	@auth
 		@if (auth()->user()->id != $response->creator->id
-					&& $checkUserSubscription && $response->price == 0.00
+					&& $response->price == 0.00
 					&& $settings->disable_tips == 'off'
 
 					|| auth()->user()->id != $response->creator->id
-					&& $checkUserSubscription
 					&& $response->price != 0.00
-					&& $checkPayPerView
-					&& $settings->disable_tips == 'off'
-
-					|| auth()->check() && $response->locked == 'yes'
-					&& $response->price != 0.00
-					&& ! $checkUserSubscription
 					&& $checkPayPerView
 					&& $settings->disable_tips == 'off'
 
@@ -625,22 +581,12 @@
 	@if (auth()->user()->id == $response->creator->id
 
 		|| $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price == 0.00
 
 		|| $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price != 0.00
 		&& $checkPayPerView
-
-		|| auth()->check() && $response->locked == 'yes'
-		&& $response->price != 0.00
-		&& ! $checkUserSubscription
-		&& $checkPayPerView
-
-		|| auth()->user()->role == 'admin'
-		&& auth()->user()->permission == 'all'
-		|| $response->locked == 'no')
+		)
 
 		@include('includes.comments')
 
@@ -652,17 +598,10 @@
 	@if (auth()->user()->id == $response->creator->id
 
 		|| $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price == 0.00
 
 		|| $response->locked == 'yes'
-		&& $checkUserSubscription
 		&& $response->price != 0.00
-		&& $checkPayPerView
-
-		|| auth()->check() && $response->locked == 'yes'
-		&& $response->price != 0.00
-		&& ! $checkUserSubscription
 		&& $checkPayPerView
 
 		|| auth()->user()->role == 'admin'

@@ -743,7 +743,7 @@ class UpdatesController extends Controller
   public function getFileMedia($typeMedia, $fileId)
   {
     $response = Media::findOrFail($fileId);
-    $checkUserSubscription = auth()->check() ? auth()->user()->checkSubscription($response->updates->user()) : null;
+    $checkUserSubscription = true;
 
     switch ($typeMedia) {
       case 'video':
@@ -976,16 +976,9 @@ class UpdatesController extends Controller
   {
     $epub = Media::with(['updates'])->whereId($id)->firstOrfail();
 
-    $checkUserSubscription = auth()->user()->checkSubscription($epub->user());
-
     if ($epub->updates->locked == 'yes') {
       if (
-        !$checkUserSubscription
-        && !auth()->user()->payPerView()->whereUpdatesId($epub->updates_id)->first()
-        && $epub->user()->id != auth()->id()
-        || $checkUserSubscription
-        && $epub->updates->price != 0.00
-        && $checkUserSubscription->free == 'yes'
+        $epub->updates->price != 0.00
         && !auth()->user()->payPerView()->whereUpdatesId($epub->updates_id)->first()
       ) {
         abort(404);

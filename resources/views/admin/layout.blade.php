@@ -163,14 +163,6 @@
               </li><!-- /end list -->
               @endif
 
-              @if (auth()->user()->hasPermission('subscriptions'))
-            <li class="nav-item">
-                <a href="{{ url('panel/admin/subscriptions') }}" class="nav-link text-truncate @if (request()->is('panel/admin/subscriptions')) active @endif">
-                    <i class="bi-arrow-repeat me-2"></i> {{ __('admin.subscriptions') }}
-                </a>
-            </li><!-- /end list -->
-            @endif
-
               @if (auth()->user()->hasPermission('transactions'))
               <li class="nav-item">
                   <a href="{{ url('panel/admin/transactions') }}" class="nav-link text-truncate @if (request()->is('panel/admin/transactions')) active @endif">

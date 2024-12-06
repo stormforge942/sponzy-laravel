@@ -447,45 +447,4 @@ class CCBillController extends Controller
       return redirect('/');
     }
   } // End method
-
-  public function cancelSubscription($id)
-  {
-    $subscription = auth()->user()->userSubscriptions()->whereId($id)->firstOrFail();
-
-    // Get Payment Gateway
-    $payment = PaymentGateways::whereName('CCBill')->firstOrFail();
-
-    $client = new HttpClient(['debug' => fopen('php://stderr', 'w')]);
-    $data = [
-      'clientAccnum' => $payment->ccbill_accnum,
-      'clientSubacc' => $payment->ccbill_subacc_subscriptions,
-      'username' => $payment->ccbill_datalink_username,
-      'password' => $payment->ccbill_datalink_password,
-      'subscriptionId' => $subscription->subscription_id,
-      'action' => 'cancelSubscription',
-    ];
-
-    if ($payment->ccbill_skip_subaccount_cancellations) {
-      unset($data['clientSubacc']);
-    }
-
-    $request = $client->request('GET', 'https://datalink.ccbill.com/utils/subscriptionManagement.cgi', [
-      'query' => $data,
-    ]);
-
-    $response = $request->getBody()->getContents();
-
-    if ($response) {
-      $payload = str_getcsv($response, "\n");
-      if ($payload && isset($payload[0]) && isset($payload[1])) {
-        if ($payload[0] === 'results' && $payload[1] === '1') {
-          $subscription->cancelled = 'yes';
-          $subscription->save();
-          return back()->withSubscriptionCancel(__('general.subscription_cancel'));
-        } else {
-          return back()->withErrorCancel(true);
-        }
-      }
-    }
-  }
 }

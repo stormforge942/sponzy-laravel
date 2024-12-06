@@ -360,18 +360,4 @@ class CardinityController extends Controller
       return redirect('/');
     }
   }
-
-  public function cancelSubscription($id)
-  {
-    $subscription = auth()->user()->userSubscriptions()->whereId($id)->firstOrFail();
-    $creator = Plans::whereName($subscription->stripe_price)->first();
-
-    // Delete Subscription
-    $subscription->cancelled = 'yes';
-    $subscription->save();
-
-    session()->put('subscription_cancel', __('general.subscription_cancel'));
-
-    return redirect($creator->user()->username);
-  }
 }

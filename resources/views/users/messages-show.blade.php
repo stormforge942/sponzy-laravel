@@ -4,7 +4,7 @@
 
 @section('css')
   <script type="text/javascript">
-      var subscribed_active = {{ $subscribedToYourContent || $subscribedToMyContent || auth()->user()->isSuperAdmin() || $user->isSuperAdmin() ? 'true' : 'false' }};
+      var subscribed_active = {{ auth()->user()->isSuperAdmin() || $user->isSuperAdmin() ? 'true' : 'false' }};
       var user_id_chat = {{ $user->id }};
       var msg_count_chat = {{ $messages->count() }};
   </script>
@@ -130,121 +130,110 @@
       @if (!auth()->user()->checkRestriction($user->id) && $user->allow_dm)
           <div class="card-footer bg-white position-relative">
 
-          @if ($subscribedToYourContent || $subscribedToMyContent || auth()->user()->isSuperAdmin() || $user->isSuperAdmin())
+          <div class="w-100 display-none" id="previewFile">
+            <div class="previewFile d-inline"></div>
+            <a href="javascript:;" class="text-danger" id="removeFile"><i class="fa fa-times-circle"></i></a>
+          </div>
 
-            <div class="w-100 display-none" id="previewFile">
-              <div class="previewFile d-inline"></div>
-              <a href="javascript:;" class="text-danger" id="removeFile"><i class="fa fa-times-circle"></i></a>
+          <div class="progress-upload-cover" style="width: 0%; top:0;"></div>
+
+          <div class="blocked display-none"></div>
+
+          <!-- Alert -->
+          <div class="alert alert-danger my-3" id="errorMsg" style="display: none;">
+            <ul class="list-unstyled m-0" id="showErrorMsg"></ul>
+          </div><!-- Alert -->
+
+          <form action="{{url('message/send')}}" method="post" accept-charset="UTF-8" id="formSendMsg" enctype="multipart/form-data">
+            <input type="hidden" name="id_user" id="id_user" value="{{$user->id}}">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="file" name="zip" id="zipFile" accept="application/x-zip-compressed" class="visibility-hidden">
+
+            <div class="w-100 mr-2 position-relative">
+              <div>
+              <span class="triggerEmoji" data-toggle="dropdown">
+                <i class="bi-emoji-smile"></i>
+              </span>
+
+              <div class="dropdown-menu dropdown-menu-right dropdown-emoji custom-scrollbar" aria-labelledby="dropdownMenuButton">
+                @include('includes.emojis')
+              </div>
+            </div>
+              <textarea class="form-control textareaAutoSize emojiArea border-0" data-post-length="{{$settings->update_length}}" rows="1" placeholder="{{__('general.write_something')}}" id="message" name="message"></textarea>
             </div>
 
-            <div class="progress-upload-cover" style="width: 0%; top:0;"></div>
-
-            <div class="blocked display-none"></div>
-
-            <!-- Alert -->
-            <div class="alert alert-danger my-3" id="errorMsg" style="display: none;">
-             <ul class="list-unstyled m-0" id="showErrorMsg"></ul>
-           </div><!-- Alert -->
-
-            <form action="{{url('message/send')}}" method="post" accept-charset="UTF-8" id="formSendMsg" enctype="multipart/form-data">
-              <input type="hidden" name="id_user" id="id_user" value="{{$user->id}}">
-              <input type="hidden" name="_token" value="{{ csrf_token() }}">
-              <input type="file" name="zip" id="zipFile" accept="application/x-zip-compressed" class="visibility-hidden">
-
-              <div class="w-100 mr-2 position-relative">
-                <div>
-                <span class="triggerEmoji" data-toggle="dropdown">
-                  <i class="bi-emoji-smile"></i>
-                </span>
-
-                <div class="dropdown-menu dropdown-menu-right dropdown-emoji custom-scrollbar" aria-labelledby="dropdownMenuButton">
-                  @include('includes.emojis')
-                </div>
+            <div class="form-group display-none mt-2" id="price">
+              <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">{{$settings->currency_symbol}}</span>
               </div>
-                <textarea class="form-control textareaAutoSize emojiArea border-0" data-post-length="{{$settings->update_length}}" rows="1" placeholder="{{__('general.write_something')}}" id="message" name="message"></textarea>
+                  <input class="form-control isNumber" autocomplete="off" name="price" placeholder="{{__('general.price')}}" type="text">
               </div>
+            </div><!-- End form-group -->
 
-              <div class="form-group display-none mt-2" id="price">
-                <div class="input-group mb-2">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">{{$settings->currency_symbol}}</span>
-                </div>
-                    <input class="form-control isNumber" autocomplete="off" name="price" placeholder="{{__('general.price')}}" type="text">
-                </div>
-              </div><!-- End form-group -->
+            <div class="w-100 mb-2">
+              <small id="previewImage"></small>
+              <a href="javascript:void(0)" id="removePhoto" class="text-danger p-1 small display-none btn-tooltip" data-toggle="tooltip" data-placement="top" title="{{__('general.delete')}}"><i class="fa fa-times-circle"></i></a>
+            </div>
 
-              <div class="w-100 mb-2">
-                <small id="previewImage"></small>
-                <a href="javascript:void(0)" id="removePhoto" class="text-danger p-1 small display-none btn-tooltip" data-toggle="tooltip" data-placement="top" title="{{__('general.delete')}}"><i class="fa fa-times-circle"></i></a>
-              </div>
+            <div class="w-100 mb-2">
+              <small id="previewEpub"></small>
+              <a href="javascript:void(0)" id="removeEpub" class="text-danger p-1 small display-none btn-tooltip-form" data-toggle="tooltip" data-placement="top" title="{{__('general.delete')}}"><i class="fa fa-times-circle"></i></a>
+            </div>
 
-              <div class="w-100 mb-2">
-                <small id="previewEpub"></small>
-                <a href="javascript:void(0)" id="removeEpub" class="text-danger p-1 small display-none btn-tooltip-form" data-toggle="tooltip" data-placement="top" title="{{__('general.delete')}}"><i class="fa fa-times-circle"></i></a>
-              </div>
+            <input type="file" name="media[]" id="file" accept="image/*,video/mp4,video/x-m4v,video/quicktime,audio/mp3" multiple class="visibility-hidden filepond">
 
-              <input type="file" name="media[]" id="file" accept="image/*,video/mp4,video/x-m4v,video/quicktime,audio/mp3" multiple class="visibility-hidden filepond">
+            <div class="justify-content-between mt-3 align-items-center">
 
-              <div class="justify-content-between mt-3 align-items-center">
+                  <button type="button" class="btnMultipleUpload btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_media')}} ({{ __('general.media_type_upload') }})">
+                    <i class="feather icon-image align-bottom f-size-25"></i>
+                  </button>
 
-                    <button type="button" class="btnMultipleUpload btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_media')}} ({{ __('general.media_type_upload') }})">
-                      <i class="feather icon-image align-bottom f-size-25"></i>
-                    </button>
-
-                    @if ($settings->allow_zip_files)
-                    <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_file_zip')}}" onclick="$('#zipFile').trigger('click')">
-                      <i class="bi bi-file-earmark-zip align-bottom f-size-25"></i>
-                    </button>
-                  @endif
-
-                  @if (auth()->user()->verified_id == 'yes' && $settings->allow_epub_files)
-                  <input type="file" name="epub" id="ePubFile" accept="application/epub+zip" class="visibility-hidden">
-
-                  <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_epub_file')}}" onclick="$('#ePubFile').trigger('click')">
-                    <i class="bi-book f-size-25 align-bottom"></i>
+                  @if ($settings->allow_zip_files)
+                  <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_file_zip')}}" onclick="$('#zipFile').trigger('click')">
+                    <i class="bi bi-file-earmark-zip align-bottom f-size-25"></i>
                   </button>
                 @endif
 
-                  @if (auth()->user()->verified_id == 'yes')
-                  <button type="button" id="setPrice" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.set_price_for_msg')}}">
-                    <i class="feather icon-tag align-bottom" style="font-size: 27px;"></i>
-                  </button>
-                @endif
+                @if (auth()->user()->verified_id == 'yes' && $settings->allow_epub_files)
+                <input type="file" name="epub" id="ePubFile" accept="application/epub+zip" class="visibility-hidden">
 
-                @if ($user->verified_id == 'yes' && $settings->disable_tips == 'off')
-                  <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="modal" title="{{__('general.tip')}}" data-target="#tipForm" data-cover="{{Helper::getFile(config('path.cover').$user->cover)}}" data-avatar="{{Helper::getFile(config('path.avatar').$user->avatar)}}" data-name="{{$user->hide_name == 'yes' ? $user->username : $user->name}}" data-userid="{{$user->id}}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
-                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518l.087.02z"/>
-                      <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                      <path fill-rule="evenodd" d="M8 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
-                    </svg>
-                  </button>
-                @endif
-
-                @if ($user->verified_id == 'yes' && $settings->gifts)
-                <button type="button" data-toggle="modal" title="{{__('general.gifts')}}" data-target="#giftsForm" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill">
-                  <i class="bi-gift f-size-25 align-bottom"></i>
+                <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.upload_epub_file')}}" onclick="$('#ePubFile').trigger('click')">
+                  <i class="bi-book f-size-25 align-bottom"></i>
                 </button>
-                @endif
+              @endif
 
-          <div class="d-inline-block float-right rounded-pill mt-1 position-relative">
-            <div class="btn-blocked display-none"></div>
-            <button type="submit" id="button-reply-msg" disabled data-send="{{ __('auth.send') }}" data-wait="{{ __('general.send_wait') }}" class="btn btn-sm btn-primary rounded-pill float-right e-none w-100-mobile">
-              <i class="far fa-paper-plane"></i>
-            </button>
-            </div>
+                @if (auth()->user()->verified_id == 'yes')
+                <button type="button" id="setPrice" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.set_price_for_msg')}}">
+                  <i class="feather icon-tag align-bottom" style="font-size: 27px;"></i>
+                </button>
+              @endif
 
-          </div><!-- media -->
-        </form>
-      @else
-        <div class="alert alert-primary m-0 alert-dismissible fade show" role="alert">
-          <i class="fa fa-info-circle mr-2"></i>
-          @php
-            $nameUser = $user->hide_name == 'yes' ? $user->username : $user->first_name;
-          @endphp
-        {!! __('general.show_form_msg_error_subscription_', ['user' => '<a href="'.url($user->username).'" class="link-border text-white">'.$nameUser.'</a>']) !!}
-      </div>
-        @endif
+              @if ($user->verified_id == 'yes' && $settings->disable_tips == 'off')
+                <button type="button" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="modal" title="{{__('general.tip')}}" data-target="#tipForm" data-cover="{{Helper::getFile(config('path.cover').$user->cover)}}" data-avatar="{{Helper::getFile(config('path.avatar').$user->avatar)}}" data-name="{{$user->hide_name == 'yes' ? $user->username : $user->name}}" data-userid="{{$user->id}}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
+                    <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518l.087.02z"/>
+                    <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path fill-rule="evenodd" d="M8 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
+                  </svg>
+                </button>
+              @endif
+
+              @if ($user->verified_id == 'yes' && $settings->gifts)
+              <button type="button" data-toggle="modal" title="{{__('general.gifts')}}" data-target="#giftsForm" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill">
+                <i class="bi-gift f-size-25 align-bottom"></i>
+              </button>
+              @endif
+
+        <div class="d-inline-block float-right rounded-pill mt-1 position-relative">
+          <div class="btn-blocked display-none"></div>
+          <button type="submit" id="button-reply-msg" disabled data-send="{{ __('auth.send') }}" data-wait="{{ __('general.send_wait') }}" class="btn btn-sm btn-primary rounded-pill float-right e-none w-100-mobile">
+            <i class="far fa-paper-plane"></i>
+          </button>
+          </div>
+
+        </div><!-- media -->
+      </form>
 
       </div><!-- card footer -->
 

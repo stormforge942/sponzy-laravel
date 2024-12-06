@@ -983,27 +983,6 @@ class Helper
 			->first();
 	}
 
-	public static function calculateSubscriptionDiscount($interval, $priceMonth, $planPrice)
-	{
-		switch ($interval) {
-			case 'weekly':
-				return number_format(((($priceMonth / 4) - $planPrice) / ($priceMonth / 4) * 100), 0);
-				break;
-
-			case 'quarterly':
-				return number_format(((($priceMonth * 3) - $planPrice) / ($priceMonth * 3) * 100), 0);
-				break;
-
-			case 'biannually':
-				return number_format(((($priceMonth * 6) - $planPrice) / ($priceMonth * 6) * 100), 0);
-				break;
-
-			case 'yearly':
-				return number_format(((($priceMonth * 12) - $planPrice) / ($priceMonth * 12) * 100), 0);
-				break;
-		}
-	}
-
 	public static function formatDatepicker($datepicker = false)
 	{
 		switch (config('settings.date_format')) {

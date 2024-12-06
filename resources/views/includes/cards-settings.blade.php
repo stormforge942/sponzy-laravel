@@ -154,49 +154,6 @@
 			</div><!-- End Live Streaming private -->
 			@endif
 
-			<!-- Start Subscription -->
-			<div class="card shadow-sm card-settings mb-3">
-					<div class="list-group list-group-sm list-group-flush">
-
-			<small class="text-muted px-4 pt-3 text-uppercase mb-1 font-weight-bold">{{ __('general.subscription') }}</small>
-
-			@if (auth()->user()->verified_id == 'yes')
-			<a href="{{url('settings/subscription')}}" class="list-group-item list-group-item-action d-flex justify-content-between @if (request()->is('settings/subscription')) active @endif">
-					<div>
-							<i class="bi bi-cash-stack mr-2"></i>
-							<span>{{__('general.subscription_price')}}</span>
-					</div>
-					<div>
-							<i class="feather icon-chevron-right"></i>
-					</div>
-			</a>
-		@endif
-
-			@if (auth()->user()->verified_id == 'yes')
-			<a href="{{url('my/subscribers')}}" class="list-group-item list-group-item-action d-flex justify-content-between @if (request()->is('my/subscribers')) active @endif">
-					<div>
-							<i class="feather icon-users mr-2"></i>
-							<span>{{__('users.my_subscribers')}}</span>
-					</div>
-					<div>
-							<i class="feather icon-chevron-right"></i>
-					</div>
-			</a>
-		@endif
-
-			<a href="{{url('my/subscriptions')}}" class="list-group-item list-group-item-action d-flex justify-content-between @if (request()->is('my/subscriptions')) active @endif">
-					<div>
-							<i class="feather icon-user-check mr-2"></i>
-							<span>{{__('users.my_subscriptions')}}</span>
-					</div>
-					<div>
-							<i class="feather icon-chevron-right"></i>
-					</div>
-			</a>
-
-		</div>
-	</div><!-- End Subscription -->
-
 	<!-- Start Privacy and security -->
 	<div class="card shadow-sm card-settings mb-3">
 			<div class="list-group list-group-sm list-group-flush">

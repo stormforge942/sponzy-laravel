@@ -283,23 +283,6 @@ class UserController extends Controller
       ->groupBy('updates.id')
       ->simplePaginate(config('settings.number_posts_show'));
 
-    // Check if subscription exists
-    if (auth()->check()) {
-      $checkSubscription = auth()->user()->checkSubscription($user);
-
-      if ($checkSubscription) {
-        // Get Payment gateway the subscription
-        $paymentGatewaySubscription = Transactions::whereSubscriptionsId($checkSubscription->id)->first();
-      }
-
-      // Check Payment Incomplete
-      $paymentIncomplete = auth()->user()
-        ->userSubscriptions()
-        ->whereIn('stripe_price', $user->plans()->pluck('name'))
-        ->whereStripeStatus('incomplete')
-        ->first();
-    }
-
     //<<<-- * Redirect the user real name * -->>>
     $uri = request()->path();
     $uriCanonical = $user->username . $media;
@@ -313,9 +296,6 @@ class UserController extends Controller
 
     // Categories
     $categories = explode(',', $user->categories_id);
-
-    // Subscriptions Active
-    $subscriptionsActive = $user->totalSubscriptionsActive();
 
     // User Plans
     $plans = $user->plans()
@@ -387,7 +367,6 @@ class UserController extends Controller
       'totalFiles' => $user->media()->where('media.type', 'file')->count(),
       'totalEpub' => $user->media()->where('media.type', 'epub')->count(),
       '_stripe' => $_stripe,
-      'checkSubscription' => $checkSubscription ?? null,
       'media' => $media,
       'mediaTitle' => $mediaTitle,
       'sortPostByTypeMedia' => $sortPostByTypeMedia,
@@ -395,8 +374,6 @@ class UserController extends Controller
       'paymentIncomplete' => $paymentIncomplete ?? null,
       'likeCount' => $likeCount,
       'categories' => $categories,
-      'paymentGatewaySubscription' => $paymentGatewaySubscription->payment_gateway ?? null,
-      'subscriptionsActive' => $subscriptionsActive,
       'plans' => $plans,
       'userPlanMonthlyActive' => $userPlanMonthlyActive ?? null,
       'userProducts' => $userProducts,
@@ -544,10 +521,6 @@ class UserController extends Controller
       ->where('notifications.destination', '=',  auth()->id())
       ->where('users.status', '=',  'active');
 
-    // Sort by subscriptions
-    $notifications->when(request('sort') == 'subscriptions', function ($q) {
-      $q->where('notifications.type', 1);
-    });
 
     // Sort by likes
     $notifications->when(request('sort') == 'likes', function ($q) {
@@ -584,12 +557,12 @@ class UserController extends Controller
   public function settingsNotifications()
   {
     $user = User::find(auth()->id());
-    $user->notify_new_subscriber = $this->request->notify_new_subscriber ?? 'no';
+    // $user->notify_new_subscriber = $this->request->notify_new_subscriber ?? 'no';
     $user->notify_liked_post = $this->request->notify_liked_post ?? 'no';
     $user->notify_liked_comment = $this->request->notify_liked_comment ?? 'no';
     $user->notify_commented_post = $this->request->notify_commented_post ?? 'no';
     $user->notify_new_tip = $this->request->notify_new_tip ?? 'no';
-    $user->email_new_subscriber = $this->request->email_new_subscriber ?? 'no';
+    // $user->email_new_subscriber = $this->request->email_new_subscriber ?? 'no';
     $user->notify_email_new_post = $this->request->notify_email_new_post ?? 'no';
     $user->notify_new_ppv = $this->request->notify_new_ppv ?? 'no';
     $user->email_new_tip = $this->request->email_new_tip ?? 'no';
@@ -644,29 +617,6 @@ class UserController extends Controller
     \Session::flash('status', __('auth.success_update_password'));
 
     return redirect('settings/password');
-  }
-
-  public function mySubscribers()
-  {
-    $subscriptions = auth()->user()->mySubscriptions()
-      ->with('subscriber:id,username,avatar,name')
-      ->latest()
-      ->paginate(20)->onEachSide(1);
-
-    return view('users.my_subscribers')->withSubscriptions($subscriptions);
-  }
-
-  public function mySubscriptions()
-  {
-    $subscriptions = auth()->user()->userSubscriptions()
-      ->with('creator:id,avatar,username,name,plan')
-      ->latest()
-      ->whereIn('id', function ($q) {
-        $q->selectRaw('MAX(id) FROM subscriptions GROUP BY creator_id, user_id');
-      })
-      ->paginate(20)->onEachSide(1);
-
-    return view('users.my_subscriptions')->withSubscriptions($subscriptions);
   }
 
   public function myPayments()
@@ -965,225 +915,6 @@ class UserController extends Controller
     ]);
   }
 
-  public function saveSubscription()
-  {
-    $input = $this->request->all();
-
-    if (auth()->user()->verified_id == 'no' || auth()->user()->verified_id == 'reject') {
-      return back();
-    }
-
-    if ($this->settings->currency_position == 'right') {
-      $currencyPosition =  2;
-    } else {
-      $currencyPosition =  null;
-    }
-
-    if (!$this->request->free_subscription) {
-
-      $messages = [
-        'price_weekly.min' => __('users.price_minimum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        'price_weekly.max' => __('users.price_maximum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-
-        "price_weekly.required_if" => __('general.subscription_price_required'),
-
-        'price.min' => __('users.price_minimum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        'price.max' => __('users.price_maximum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        "price.required" => __('general.subscription_price_required'),
-
-        'price_quarterly.min' => __('users.price_minimum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        'price_quarterly.max' => __('users.price_maximum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        "price_quarterly.required_if" => __('general.subscription_price_required'),
-
-        'price_biannually.min' => __('users.price_minimum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        'price_biannually.max' => __('users.price_maximum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        "price_biannually.required_if" => __('general.subscription_price_required'),
-
-        'price_yearly.min' => __('users.price_minimum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        'price_yearly.max' => __('users.price_maximum_subscription' . $currencyPosition, ['symbol' => $this->settings->currency_symbol, 'code' => $this->settings->currency_code]),
-        "price_yearly.required_if" => __('general.subscription_price_required'),
-      ];
-
-      $validator = Validator::make($input, [
-        'price_weekly' => 'required_if:status_weekly,1|numeric|min:' . $this->settings->min_subscription_amount . '|max:' . $this->settings->max_subscription_amount . '',
-        'price' => 'required|numeric|min:' . $this->settings->min_subscription_amount . '|max:' . $this->settings->max_subscription_amount . '',
-        'price_quarterly' => 'required_if:status_quarterly,1|numeric|min:' . $this->settings->min_subscription_amount . '|max:' . $this->settings->max_subscription_amount . '',
-        'price_biannually' => 'required_if:status_biannually,1|numeric|min:' . $this->settings->min_subscription_amount . '|max:' . $this->settings->max_subscription_amount . '',
-        'price_yearly' => 'required_if:status_yearly,1|numeric|min:' . $this->settings->min_subscription_amount . '|max:' . $this->settings->max_subscription_amount . '',
-      ], $messages);
-
-      if ($validator->fails()) {
-        return redirect()->back()
-          ->withErrors($validator)
-          ->withInput();
-      }
-
-      // Subscription Price (Weekly)
-      if ($this->request->price_weekly) {
-        $plan = Plans::updateOrCreate(
-          [
-            'user_id' => auth()->id(),
-            'name' => 'user_' . auth()->id() . '_weekly'
-          ],
-          [
-            'price' => $this->request->price_weekly,
-            'interval' => 'weekly',
-            'status' => $this->request->status_weekly ?? '0',
-          ]
-        );
-      }
-
-      // Subscription Price (Per month)
-      if ($this->request->price) {
-        $plan = Plans::updateOrCreate(
-          [
-            'user_id' => auth()->id(),
-            'name' => 'user_' . auth()->id()
-          ],
-          [
-            'price' => $this->request->price,
-            'interval' => 'monthly',
-            'status' => '1'
-          ]
-        );
-      }
-
-      // Subscription Price (3 months)
-      if ($this->request->price_quarterly) {
-        $plan = Plans::updateOrCreate(
-          [
-            'user_id' => auth()->id(),
-            'name' => 'user_' . auth()->id() . '_quarterly'
-          ],
-          [
-
-            'price' => $this->request->price_quarterly,
-            'interval' => 'quarterly',
-            'status' => $this->request->status_quarterly ?? '0',
-          ]
-        );
-      }
-
-      // Subscription Price (6 months)
-      if ($this->request->price_biannually) {
-        $plan = Plans::updateOrCreate(
-          [
-            'user_id' => auth()->id(),
-            'name' => 'user_' . auth()->id() . '_biannually'
-          ],
-          [
-
-            'price' => $this->request->price_biannually,
-            'interval' => 'biannually',
-            'status' => $this->request->status_biannually ?? '0',
-          ]
-        );
-      }
-
-      // Subscription Price (12 months)
-      if ($this->request->price_yearly) {
-        $plan = Plans::updateOrCreate(
-          [
-            'user_id' => auth()->id(),
-            'name' => 'user_' . auth()->id() . '_yearly'
-          ],
-          [
-
-            'price' => $this->request->price_yearly,
-            'interval' => 'yearly',
-            'status' => $this->request->status_yearly ?? '0',
-          ]
-        );
-      }
-    } // Request free subscription
-
-    $freeSubscription = $this->request->free_subscription ?? 'no';
-
-    // Notify to subscribers
-    $notifySubscriber = $freeSubscription != auth()->user()->free_subscription
-      ? event(new SubscriptionDisabledEvent(auth()->user(), $freeSubscription))
-      : null;
-
-    // Free Subscription
-    auth()->user()->update(['free_subscription' => $freeSubscription]);
-
-    return redirect('settings/subscription')
-      ->withStatus(__('admin.success_update'));
-  }
-
-  protected function createPlanStripe()
-  {
-    $payment = PaymentGateways::whereName('Stripe')->whereEnabled(1)->first();
-    $plan = 'user_' . auth()->id();
-
-    if ($payment) {
-      if ($this->request->price != auth()->user()->price) {
-        $stripe = new \Stripe\StripeClient($payment->key_secret);
-
-        try {
-          $planCurrent = $stripe->plans->retrieve($plan, []);
-
-          // Delete old plan
-          $stripe->plans->delete($plan, []);
-
-          // Delete Product
-          $stripe->products->delete($planCurrent->product, []);
-        } catch (\Exception $exception) {
-          // not exists
-        }
-
-        // Create Plan
-        $plan = $stripe->plans->create([
-          'currency' => $this->settings->currency_code,
-          'interval' => 'month',
-          "product" => [
-            "name" => __('general.subscription_for') . ' @' . auth()->user()->username,
-          ],
-          'nickname' => $plan,
-          'id' => $plan,
-          'amount' => $this->settings->currency_code == 'JPY' ? $this->request->price : $this->request->price * 100,
-        ]);
-      }
-    }
-  }
-
-  protected function createPlanPaystack()
-  {
-    $payment = PaymentGateways::whereName('Paystack')->whereEnabled(1)->first();
-
-    if ($payment) {
-
-      // initiate the Library's Paystack Object
-      $paystack = new Paystack($payment->key_secret);
-
-      //========== Create Plan if no exists
-      if (!auth()->user()->paystack_plan) {
-
-        $userPlan = $paystack->plan->create([
-          'name' => __('general.subscription_for') . ' @' . auth()->user()->username,
-          'amount' => auth()->user()->price * 100,
-          'interval' => 'monthly',
-          'currency' => $this->settings->currency_code
-        ]);
-
-        $planCode = $userPlan->data->plan_code;
-
-        // Insert Plan Code to User
-        User::whereId(auth()->id())->update([
-          'paystack_plan' => $planCode
-        ]);
-      } else {
-        if ($this->request->price != auth()->user()->price) {
-
-          $userPlan = $paystack->plan->update([
-            'name' => __('general.subscription_for') . ' @' . auth()->user()->username,
-            'amount' => $this->request->price * 100,
-          ], ['id' => auth()->user()->paystack_plan]);
-        }
-      }
-    } // payment
-  } // end method
-
   public function uploadAvatar()
   {
     $validator = Validator::make($this->request->all(), [
@@ -1232,9 +963,8 @@ class UserController extends Controller
   public function uploadCover()
   {
     $validator = Validator::make($this->request->all(), [
-      'image' => 'required|mimes:jpg,gif,png,jpe,jpeg|dimensions:min_width=800,min_height=400|max:' . config('settings.file_size_allowed') . '',
+      'image' => 'required|mimes:jpg,gif,png,jpe,jpeg|max:' . config('settings.file_size_allowed') . '',
     ]);
-
     if ($validator->fails()) {
       return response()->json([
         'success' => false,
@@ -1723,29 +1453,6 @@ class UserController extends Controller
     ]);
   } // End Method
 
-  public function cancelSubscription($id)
-  {
-    $checkSubscription = auth()->user()->userSubscriptions()->whereStripeId($id)->firstOrFail();
-    $creator = User::wherePlan($checkSubscription->stripe_price)->first();
-    $payment = PaymentGateways::whereName('Stripe')->whereEnabled(1)->firstOrFail();
-
-    $stripe = new \Stripe\StripeClient($payment->key_secret);
-
-    try {
-      $response = $stripe->subscriptions->cancel($id, []);
-    } catch (\Exception $e) {
-      return back()->withErrorMessage($e->getMessage());
-    }
-
-    sleep(2);
-
-    $checkSubscription->ends_at = date('Y-m-d H:i:s', $response->current_period_end);
-    $checkSubscription->save();
-
-    session()->put('subscription_cancel', __('general.subscription_cancel'));
-    return redirect($creator->username);
-  }
-
   public function deleteAccount()
   {
     if (auth()->user()->isSuperAdmin()) {
@@ -1785,16 +1492,10 @@ class UserController extends Controller
   public function downloadFile($id)
   {
     $post = Updates::findOrFail($id);
-    $checkUserSubscription = auth()->user()->checkSubscription($post->user());
 
     if ($post->locked == 'yes') {
       if (
-        !$checkUserSubscription
-        && !auth()->user()->payPerView()->whereUpdatesId($post->id)->first()
-        && $post->user()->id != auth()->id()
-        || $checkUserSubscription
-        && $post->price != 0.00
-        && $checkUserSubscription->free == 'yes'
+        $post->price != 0.00
         && !auth()->user()->payPerView()->whereUpdatesId($post->id)->first()
       ) {
         abort(404);

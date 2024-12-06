@@ -9,27 +9,7 @@
 
 <div class="content">
 	<div class="row">
-
-		<div class="col-lg-3 mb-3">
-			<div class="card shadow-custom border-0 overflow-hidden">
-				<div class="card-body">
-					<h3>
-						<i class="bi-arrow-repeat me-2 icon-dashboard"></i>
-						<span>{{ number_format($total_subscriptions) }}</span>
-					</h3>
-					<small>{{ __('admin.subscriptions') }}</small>
-
-					<span class="icon-wrap icon--admin"><i class="bi-arrow-repeat"></i></span>
-				</div>
-				<div class="card-footer bg-light border-0 p-3">
-					<a href="{{ url('panel/admin/subscriptions') }}" class="text-muted font-weight-medium d-flex align-items-center justify-content-center arrow">
-						  {{ __('general.view_all') }}
-					  </a>
-				  </div>
-			</div><!-- card 1 -->
-		</div><!-- col-lg-3 -->
-
-		<div class="col-lg-3 mb-3">
+		<div class="col-lg-4 mb-3">
 			<div class="card shadow-custom border-0 overflow-hidden">
 				<div class="card-body">
 					<h3><i class="bi-cash-stack me-2 icon-dashboard"></i> {{ Helper::amountFormatDecimal($total_raised_funds) }}</h3>
@@ -43,9 +23,9 @@
 					  </a>
 				  </div>
 			</div><!-- card 1 -->
-		</div><!-- col-lg-3 -->
+		</div><!-- col-lg-4 -->
 
-		<div class="col-lg-3 mb-3">
+		<div class="col-lg-4 mb-3">
 			<div class="card shadow-custom border-0 overflow-hidden">
 				<div class="card-body">
 					<h3><i class="bi-people me-2 icon-dashboard"></i> {{ number_format($totalUsers) }}</h3>
@@ -58,9 +38,9 @@
 					  </a>
 				  </div>
 			</div><!-- card 1 -->
-		</div><!-- col-lg-3 -->
+		</div><!-- col-lg-4 -->
 
-		<div class="col-lg-3 mb-3">
+		<div class="col-lg-4 mb-3">
 			<div class="card shadow-custom border-0 overflow-hidden">
 				<div class="card-body">
 					<h3><i class="bi-pencil-square me-2 icon-dashboard"></i> {{ number_format($total_posts) }}</h3>
@@ -73,7 +53,7 @@
 					  </a>
 				  </div>
 			</div><!-- card 1 -->
-		</div><!-- col-lg-3 -->
+		</div><!-- col-lg-4 -->
 
 		<div class="col-lg-4 mb-3">
 			<div class="card shadow-custom border-0 overflow-hidden">
@@ -187,17 +167,6 @@
 			 </div>
 		</div>
 
-		<div class="col-lg-12 mt-0 mt-lg-3 py-4">
-			 <div class="card shadow-custom border-0">
-				 <div class="card-body">
-					 <h6 class="mb-4"><i class="bi-person-check-fill me-2"></i> {{ __('general.subscriptions_the_month') }}</h6>
-					 <div style="height: 350px">
-						<canvas id="ChartSubscriptions"></canvas>
-					</div>
-				 </div>
-			 </div>
-		</div>
-
 		<div class="col-lg-6 mt-0 mt-lg-3 py-4">
 			 <div class="card shadow-custom border-0">
 				 <div class="card-body">
@@ -237,58 +206,6 @@
 					 </div>
 				 @endif
 
-			 </div>
-		</div>
-
-		<div class="col-lg-6 mt-0 mt-lg-3 py-4">
-			 <div class="card shadow-custom border-0">
-				 <div class="card-body">
-					 <h6 class="mb-4"><i class="bi-person-check-fill me-2"></i> {{ __('admin.recent_subscriptions') }}</h6>
-
-					 @foreach ($subscriptions as $subscription)
-						 <div class="d-flex mb-3">
-							 <div class="flex-shrink-0">
-								 <img src="{{ isset($subscription->subscriber->username) ? Helper::getFile(config('path.avatar').$subscription->subscriber->avatar) : Helper::getFile(config('path.avatar').$settings->avatar) }}" width="50" class="rounded-circle" />
-							 </div>
-							  <div class="flex-grow-1 ms-3">
-							    <h6 class="m-0 fw-light text-break">
-										@if (! isset($subscription->subscriber->username))
-											<em class="text-muted">{{ __('general.no_available') }}</em>
-									@else
-										<a href="{{ url($subscription->subscriber->username) }}" target="_blank">
-											{{$subscription->subscriber->name}}
-											</a>
-										@endif
-
-										{{__('general.subscribed_to')}}
-
-										@if (! isset($subscription->creator->username))
-											<em class="text-muted">{{ __('general.no_available') }}</em>
-									@else
-										<a href="{{url($subscription->creator->username)}}" target="_blank">{{$subscription->creator->name}}</a>
-									@endif
-
-									</h6>
-
-									<div class="w-100 small">
-										{{ Helper::formatDate($subscription->created_at) }}
-									</div>
-							  </div>
-							</div>
-					 @endforeach
-
-					 @if ($subscriptions->count() == 0)
-						 <small>{{ __('admin.no_result') }}</small>
-					 @endif
-				 </div>
-
-				 @if ($subscriptions->count() != 0)
-				 <div class="card-footer bg-light border-0 p-3">
-					   <a href="{{ url('panel/admin/subscriptions') }}" class="text-muted font-weight-medium d-flex align-items-center justify-content-center arrow">
-							 {{ __('general.view_all') }}
-						 </a>
-					 </div>
-					  @endif
 			 </div>
 		</div>
 

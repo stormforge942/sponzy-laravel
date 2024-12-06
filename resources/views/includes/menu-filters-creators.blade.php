@@ -28,10 +28,6 @@
       <img src="{{url('public/img/creators.png')}}" class="mr-2" width="30" />  {{trans('general.new_creators')}}
     </a>
 
-    <a class="text-muted btn btn-sm bg-white border mb-2 e-none btn-category @if (request()->is('creators/free') || isset($isCategory) && request()->is('category/'.$slug.'/free'))active-category @endif" href="{{ isset($isCategory) ? url('category/'.$slug.'','free') : url('creators/free')}}">
-      <img src="{{url('public/img/unlock.png')}}" class="mr-2" width="30" /> {{trans('general.free_subscription')}}
-    </a>
-
     @if ($settings->search_creators_genders)
     <a class="text-muted btn btn-sm bg-white border mb-2 e-none btn-category" href="javascript:;" data-toggle="modal" data-target="#filterGendersAge">
       <img src="{{url('public/img/genders.png')}}" class="mr-2" width="30" /> {{trans('general.gender_age')}}

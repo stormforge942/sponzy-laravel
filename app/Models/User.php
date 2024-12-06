@@ -146,23 +146,6 @@ class User extends Authenticatable implements HasLocalePreference
     $this->notify(new ResetPasswordNotification($token));
   }
 
-  public function userSubscriptions()
-  {
-    return $this->hasMany(Subscriptions::class);
-  }
-
-  public function mySubscriptions()
-  {
-    return $this->hasManyThrough(
-      Subscriptions::class,
-      Plans::class,
-      'user_id',
-      'stripe_price',
-      'id',
-      'name'
-    );
-  }
-
   public function myPayments()
   {
     return $this->hasMany(Transactions::class);
@@ -193,64 +176,6 @@ class User extends Authenticatable implements HasLocalePreference
     )
       ->where('updates.status', 'active')
       ->where('media.status', 'active');
-  }
-
-  // Get all ID's of Creators User Subscriber
-  protected function fetchCretorsByIdSubscriptions()
-  {
-    $subscriptions = $this->userSubscriptionsActive();
-
-    foreach ($subscriptions as $key) {
-      $explode = explode('_', $key->stripe_price);
-      $feedSubscriptions[] = $explode[1];
-    }
-
-    // Get current user's content (if creator)
-    $feedSubscriptions[] = $this->id;
-
-    return $feedSubscriptions;
-  }
-
-  public function feed($skip = null)
-  {
-    $fetchSubscriptions = $this->fetchCretorsByIdSubscriptions();
-
-    $posts = Updates::getSelectRelations()
-      ->whereIntegerInRaw('user_id', $fetchSubscriptions)
-      ->where('status', 'active')
-      ->groupBy('id')
-      ->orderBy('id', 'desc');
-
-    if (isset($skip)) {
-      $posts = $posts->skip($skip)
-        ->take(config('settings.number_posts_show'))
-        ->get();
-    } else {
-      $posts = $posts->simplePaginate(config('settings.number_posts_show'));
-    }
-
-    return $posts;
-  }
-
-  public function stories()
-  {
-    $fetchSubscriptions = $this->fetchCretorsByIdSubscriptions();
-
-    $stories = Stories::select([
-      'id',
-      'user_id',
-      'title',
-      'status',
-      'created_at'
-    ])->whereIntegerInRaw('user_id', $fetchSubscriptions)
-      ->where('created_at', '>', date('Y-m-d H:i:s', strtotime('- 1 day')))
-      ->whereStatus('active')
-      ->with(['user:id,name,username,avatar,hide_name', 'media'])
-      ->groupBy('id')
-      ->orderBy('id', 'desc')
-      ->get();
-
-    return $stories;
   }
 
   public function withdrawals()
@@ -353,22 +278,6 @@ class User extends Authenticatable implements HasLocalePreference
   public function likesCount()
   {
     return $this->hasManyThrough(Like::class, Updates::class, 'user_id', 'updates_id')->where('likes.status', '=', '1')->count();
-  }
-
-  public function checkSubscription($creator)
-  {
-    return $this->userSubscriptions()
-      ->whereIn('stripe_price', $creator->plans->pluck('name'))
-      ->where('ends_at', '>=', now())
-
-      ->orWhere('stripe_status', 'active')
-      ->whereIn('stripe_price', $creator->plans->pluck('name'))
-      ->whereUserId($this->id)
-
-      ->orWhere('free', 'yes')
-      ->where('stripe_price', $creator->plan)
-      ->whereUserId($this->id)
-      ->first();
   }
 
   public function checkPayPerViewMsg($msgId)

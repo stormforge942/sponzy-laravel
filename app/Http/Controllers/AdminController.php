@@ -32,7 +32,6 @@ use App\Models\Transactions;
 use Illuminate\Http\Request;
 use App\Models\AdminSettings;
 use App\Models\Notifications;
-use App\Models\Subscriptions;
 use App\Models\ShopCategories;
 use App\Models\PaymentGateways;
 use Illuminate\Validation\Rule;
@@ -85,35 +84,11 @@ class AdminController extends Controller
 
 		$dataChart = implode(',', $allData);
 
-		$subscriptionsChart = Subscriptions::selectRaw('DATE(`created_at`) as `date`')
-			->selectRaw('COUNT(`id`) as `total`')
-			->where('created_at', '>', Carbon::parse()->startOfMonth())
-			->where('created_at', '<', Carbon::parse()->endOfMonth())
-			->groupBy('date')
-			->orderBy('date', 'ASC')
-			->get()
-			->pluck('total', 'date');
-
-		$subscriptionsChartQuery = $dates->merge($subscriptionsChart);
-
-		foreach ($subscriptionsChartQuery as $key => $value) {
-			$allDataSubscriptions[] = $value;
-		}
-
-		$dataChartSubscriptions = implode(',', $allDataSubscriptions);
-
 		$totalUsers = User::selectRaw('COUNT(`id`) as `total`')->pluck('total')->first();
-		$total_subscriptions = Subscriptions::selectRaw('COUNT(id) as total')->pluck('total')->first();
 		$total_posts = Updates::selectRaw('COUNT(`id`) as `total`')->pluck('total')->first();
 
 		$users = User::select(['id', 'username', 'avatar', 'name', 'status', 'date'])
 			->orderBy('id', 'DESC')
-			->take(4)
-			->get();
-
-		$subscriptions = Subscriptions::with(['subscriber:id,username,avatar,name', 'creator:id,username,name,plan'])
-			->select(['id', 'creator_id', 'user_id', 'stripe_price', 'created_at'])
-			->orderBy('id', 'desc')
 			->take(4)
 			->get();
 
@@ -156,8 +131,6 @@ class AdminController extends Controller
 			'total_funds' => $revenues->totalUserRaisedFunds + $revenues->totalRaisedFunds,
 			'total_paid_funds' => $revenues->totalUserRaisedFunds,
 			'totalPaidlastMonth' => $totalPaidlastMonth,
-			'total_subscriptions' => $total_subscriptions,
-			'subscriptions' => $subscriptions,
 			'total_posts' => $total_posts,
 			'stat_revenue_today' => $stat_revenue_today,
 			'stat_revenue_yesterday' => $stat_revenue_yesterday,
@@ -166,7 +139,6 @@ class AdminController extends Controller
 			'stat_revenue_month' => $stat_revenue_month,
 			'stat_revenue_last_month' => $stat_revenue_last_month,
 			'label' => Helper::formatMonth(),
-			'dataChartSubscriptions' => $dataChartSubscriptions
 		]);
 	}
 
@@ -483,13 +455,6 @@ class AdminController extends Controller
 		\Session::flash('success_message', __('admin.success_update'));
 
 		return redirect('panel/admin/profiles-social');
-	}
-
-	public function subscriptions()
-	{
-		$data = Subscriptions::orderBy('id', 'DESC')->paginate(50);
-
-		return view('admin.subscriptions', ['data' => $data]);
 	}
 
 	public function transactions(Request $request)
