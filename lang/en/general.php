@@ -1361,6 +1361,7 @@ return array(
 		'disable_explore_section' => 'Disable Explore section',
 		'disable_creators_section' => 'Disable Creators section',
 		'gift_for' => 'Gift for',
+		'invisible' => 'If invisible, the post will be invisible to unpurchased user',
 
 		// Version 5.6
 		'increase_decrease_amount' => 'to increase/decrease amount',

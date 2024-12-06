@@ -129,6 +129,11 @@
               @include('includes.emojis')
             </div>
 
+            <button type="button" id="setVisible" data-toggle="tooltip" data-placement="top" title="{{__('general.invisible')}}" class="btn btn-post p-bottom-8 btn-tooltip-form e-none @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill">
+                <i class="bi-eye-slash f-size-20 align-bottom"></i>
+                <input type="checkbox" name="invisible" style="display: none;" checked>
+            </button>
+
             <div class="d-inline-block float-right mt-3 mt-lg-1 position-relative w-100-mobile">
 
               <span class="d-inline-block float-right position-relative rounded-pill w-100-mobile">

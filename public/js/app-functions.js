@@ -2174,6 +2174,19 @@ $(document).on('click','.refresh_creators',function (e) {
 		}
  	});
 
+	 $(document).on('click','#setVisible',function () {
+		var input = $(this).find('input[name=invisible]');
+		var eyeIcon = $(this).find('i');
+
+		if (input.is(':checked')) {
+				input.prop('checked', false);
+				eyeIcon.removeClass('bi-eye-slash').addClass('bi-eye');
+		} else {
+				input.prop('checked', true);
+				eyeIcon.removeClass('bi-eye').addClass('bi-eye-slash');
+		}
+	});
+
 	// Toogle Set Price Edit Post
 	$(document).on('click','.setPrice',function () {
 

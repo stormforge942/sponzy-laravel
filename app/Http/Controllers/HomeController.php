@@ -110,7 +110,18 @@ class HomeController extends Controller
       $users = $this->userExplore();
 
       // $updates = auth()->user()->feed();
-      $updates = Updates::paginate(10);
+      $updates = Updates::where(function ($query) {
+        $query->where('user_id', auth()->id())
+              ->orWhere(function ($query) {
+                  $query->where('user_id', '!=', auth()->id())
+                        ->where('invisible', false);
+              })
+              ->orWhere(function ($query) {
+                  $query->where('user_id', '!=', auth()->id())
+                        ->where('invisible', true)
+                        ->where('created_at', '>=', Carbon::now()->subHours(24));
+              });
+      })->paginate(10);
 
       //$stories = auth()->user()->stories();
       $stories = Stories::limit(10)->get();

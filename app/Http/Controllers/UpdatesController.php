@@ -120,6 +120,7 @@ class UpdatesController extends Controller
     $post->schedule     = $this->request->scheduled_date ? true : false;
     $post->scheduled_date = $this->request->scheduled_date ?? '';
     $post->can_media_edit = true;
+    $post->invisible    = $this->request->invisible ? 1 : 0;
     $post->ip = request()->ip();
     $post->save();
 
@@ -230,6 +231,7 @@ class UpdatesController extends Controller
     $mediaCount = $data->media->isNotEmpty() ?? false;
     $fileZip = $data->media->where('type', 'file')->first();
     $fileEpub = $data->media->where('type', 'epub')->first();
+    $invisible = $data->invisible;
 
     $filePreload = $data->media()
       ->where('video_embed', '')
@@ -277,7 +279,8 @@ class UpdatesController extends Controller
       'preloadedFile' => $preloadedFile,
       'filePreload' => $filePreload,
       'fileZip' => $fileZip,
-      'fileEpub' => $fileEpub
+      'fileEpub' => $fileEpub,
+      'invisible' => $invisible,
     ]);
   }
 
@@ -364,6 +367,7 @@ class UpdatesController extends Controller
     $post->token_id     = Str::random(150);
     $post->locked       = 'yes';
     $post->price        = $this->request->price;
+    $post->invisible    = $this->request->invisible ? 1 : 0;
     $post->save();
 
     $videoEmbed = $post->media()->where('video_embed', '<>', '')->first();
