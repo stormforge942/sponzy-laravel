@@ -362,13 +362,11 @@
 	<div class="btn-block p-sm text-center content-locked pt-lg pb-lg px-3 {{$textWhite}}" style="{{$backgroundPostLocked}}">
 		<span class="btn-block text-center mb-3"><i class="feather icon-lock ico-no-result border-0 {{$textWhite}}"></i></span>
 
-		@if ($response->creator->planActive() && $response->price == 0.00
-				|| $response->creator->free_subscription == 'yes' && $response->price == 0.00)
+		@if ($response->price == 0.00)
 			<a href="{{ request()->route()->named('profile') ? 'javascript:void(0);' : url($response->creator->username) }}" @guest data-toggle="modal" data-target="#loginFormModal" @else @if (request()->route()->named('profile')) @if ($response->creator->free_subscription == 'yes') data-toggle="modal" data-target="#subscriptionFreeForm" @else data-toggle="modal" data-target="#subscriptionForm" @endif @endif @endguest class="btn btn-primary w-100">
 				{{ __('general.content_locked_user_logged') }}
 			</a>
-		@elseif ($response->creator->planActive() && $response->price != 0.00
-				|| $response->creator->free_subscription == 'yes' && $response->price != 0.00)
+		@else
 				<a href="javascript:void(0);" @guest data-toggle="modal" data-target="#loginFormModal" @else @if ($response->status == 'active') data-toggle="modal" data-target="#payPerViewForm" data-mediaid="{{$response->id}}" data-price="{{Helper::formatPrice($response->price, true)}}" data-subtotalprice="{{Helper::formatPrice($response->price)}}" data-pricegross="{{$response->price}}" @endif @endguest class="btn btn-primary w-100">
 					@guest
 						{{ __('general.content_locked_user_logged') }}
@@ -382,10 +380,6 @@
 						@endif
 						@endguest
 				</a>
-		@else
-			<a href="javascript:void(0);" class="btn btn-primary disabled w-100">
-				{{ __('general.subscription_not_available') }}
-			</a>
 		@endif
 
 		<ul class="list-inline mt-3">

@@ -34,30 +34,30 @@ class SubscriptionsController extends Controller
       ->where('id', '<>', auth()->id())
       ->firstOrFail();
 
-    // Check if Plan exists
-    $plan = $user->plans()
-      ->whereInterval($this->request->interval)
-      ->firstOrFail();
+    // // Check if Plan exists
+    // $plan = $user->plans()
+    //   ->whereInterval($this->request->interval)
+    //   ->firstOrFail();
 
-    if (!$plan->status) {
-      return response()->json([
-        'success' => false,
-        'errors' => ['error' => __('general.subscription_not_available')],
-      ]);
-    }
+    // if (!$plan->status) {
+    //   return response()->json([
+    //     'success' => false,
+    //     'errors' => ['error' => __('general.subscription_not_available')],
+    //   ]);
+    // }
 
     // Check if subscription exists
-    $checkSubscription = auth()->user()->userSubscriptions()
-      ->whereStripePrice($plan->name)
-      ->where('ends_at', '>=', now())
-      ->first();
+    // $checkSubscription = auth()->user()->userSubscriptions()
+    //   ->whereStripePrice($plan->name)
+    //   ->where('ends_at', '>=', now())
+    //   ->first();
 
-    if ($checkSubscription) {
-      return response()->json([
-        'success' => false,
-        'errors' => ['error' => __('general.subscription_exists')],
-      ]);
-    }
+    // if ($checkSubscription) {
+    //   return response()->json([
+    //     'success' => false,
+    //     'errors' => ['error' => __('general.subscription_exists')],
+    //   ]);
+    // }
 
     //<---- Validation
     $validator = Validator::make($this->request->all(), [
