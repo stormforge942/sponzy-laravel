@@ -83,10 +83,8 @@ class UserController extends Controller
     $dataChart = implode(',', $allData);
 
     $earningNetUser = auth()->user()->myPaymentsReceived()->sum('earning_net_user');
-    $earningNetSubscriptions = auth()->user()->myPaymentsReceived()->whereType('subscription')->sum('earning_net_user');
     $earningNetTips = auth()->user()->myPaymentsReceived()->whereType('tip')->sum('earning_net_user');
     $earningNetPPV = auth()->user()->myPaymentsReceived()->whereType('ppv')->sum('earning_net_user');
-    $subscriptionsActive = auth()->user()->totalSubscriptionsActive();
 
     // Today
     $stat_revenue_today = Transactions::where('created_at', '>=', date('Y-m-d H:i:s', strtotime('today')))
@@ -133,12 +131,6 @@ class UserController extends Controller
       ->whereSubscribed(auth()->id())
       ->sum('earning_net_user');
 
-    $subscriptions = auth()->user()->mySubscriptions()
-      ->with('subscriber:id,username,avatar,name')
-      ->latest()
-      ->take(3)
-      ->get();
-
     $transactions = auth()->user()->myPaymentsReceived()
       ->orderBy('id', 'desc')
       ->take(4)
@@ -146,10 +138,8 @@ class UserController extends Controller
 
     return view('users.dashboard', [
       'earningNetUser' => $earningNetUser,
-      'earningNetSubscriptions' => $earningNetSubscriptions,
       'earningNetTips' => $earningNetTips,
       'earningNetPPV' => $earningNetPPV,
-      'subscriptionsActive' => $subscriptionsActive,
       'label' => Helper::formatMonth(),
       'data' => $dataChart,
       'stat_revenue_today' => $stat_revenue_today,
@@ -158,7 +148,6 @@ class UserController extends Controller
       'stat_revenue_last_week' => $stat_revenue_last_week,
       'stat_revenue_month' => $stat_revenue_month,
       'stat_revenue_last_month' => $stat_revenue_last_month,
-      'subscriptions' => $subscriptions,
       'transactions' => $transactions
     ]);
   }

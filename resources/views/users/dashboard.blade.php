@@ -46,28 +46,6 @@
               <div class="col-lg-4 mb-2">
                 <div class="card">
                   <div class="card-body overflow-hidden position-relative">
-                    <h4><i class="fas fa-users mr-2 text-primary icon-dashboard"></i> <span title="{{$subscriptionsActive}}">{{ Helper::formatNumber($subscriptionsActive) }}</span></h4>
-                    <small>{{ __('general.subscriptions_active') }}</small>
-
-                    <span class="icon-wrap icon--dashboard"><i class="fas fa-users"></i></span>
-                  </div>
-                </div><!-- card 1 -->
-              </div><!-- col-lg-4 -->
-
-              <div class="col-lg-4 mb-2">
-                <div class="card">
-                  <div class="card-body overflow-hidden position-relative">
-                    <h4><i class="bi-arrow-repeat mr-2 text-primary icon-dashboard-2"></i> {{ Helper::amountFormatDecimal($earningNetSubscriptions) }}</h4>
-                    <small>{{ __('general.earnings_net_subscriptions') }}</small>
-
-                    <span class="icon-wrap icon--dashboard"><i class="bi-arrow-repeat"></i></span>
-                  </div>
-                </div><!-- card 1 -->
-              </div><!-- col-lg-4 -->
-
-              <div class="col-lg-4 mb-2">
-                <div class="card">
-                  <div class="card-body overflow-hidden position-relative">
                     <h4><i class="bi-coin mr-2 text-primary icon-dashboard-2"></i> {{ Helper::amountFormatDecimal($earningNetTips) }}</h4>
                     <small>{{ __('general.earnings_net_tips') }}</small>
 
@@ -164,68 +142,6 @@
                  </div>
               </div>
           
-            <div class="col-md-6 mb-5 mb-lg-0">
-              <div class="card shadow-sm">
-                <div class="card-body pb-0">
-                  <h6>{{ __('admin.recent_subscriptions') }}</h6>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-striped m-0">
-                    <thead>
-                      <tr>
-                        <th scope="col">{{__('general.subscriber')}}</th>
-                        <th scope="col">{{__('admin.date')}}</th>
-                        <th scope="col">{{__('admin.status')}}</th>
-                      </tr>
-                    </thead>
-            
-                    <tbody>
-            
-                      @foreach ($subscriptions as $subscription)
-                      <tr>
-                        <td>
-                          @if (! isset($subscription->subscriber->username))
-                          {{ __('general.no_available') }}
-                          @else
-                          <a href="{{url($subscription->subscriber->username)}}" class="mr-1">
-                            <img src="{{Helper::getFile(config('path.avatar').$subscription->subscriber->avatar)}}" width="35"
-                              height="35" class="rounded-circle mr-2">
-            
-                            {{$subscription->subscriber->hide_name == 'yes' ? $subscription->subscriber->username :
-                            $subscription->subscriber->name}}
-                          </a>
-            
-                          <a href="{{url('messages/'.$subscription->subscriber->id, $subscription->subscriber->username)}}"
-                            title="{{__('general.message')}}">
-                            <i class="feather icon-send mr-1 mr-lg-0"></i>
-                          </a>
-                          @endif
-                        </td>
-                        <td>{{Helper::formatDate($subscription->created_at)}}</td>
-                        </td>            
-                        <td>
-                          @if ($subscription->stripe_id == ''
-                          && strtotime($subscription->ends_at) > strtotime(now()->format('Y-m-d H:i:s'))
-                          && $subscription->cancelled == 'no'
-                          || $subscription->stripe_id != '' && $subscription->stripe_status == 'active'
-                          || $subscription->stripe_id == '' && $subscription->free == 'yes'
-                          )
-                          <span class="badge badge-pill badge-success text-uppercase">{{__('general.active')}}</span>
-                          @elseif ($subscription->stripe_id != '' && $subscription->stripe_status == 'incomplete')
-                          <span class="badge badge-pill badge-warning text-uppercase">{{__('general.incomplete')}}</span>
-                          @else
-                          <span class="badge badge-pill badge-danger text-uppercase">{{__('general.cancelled')}}</span>
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach
-
-                    </tbody>
-                  </table>
-                </div>
-              </div><!-- card -->
-            </div><!-- end col-md-6 -->
-
             <div class="col-md-6 mb-5 mb-lg-0">
               <div class="card shadow-sm">
                 <div class="card-body pb-0">
