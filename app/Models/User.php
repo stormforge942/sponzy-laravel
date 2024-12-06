@@ -50,9 +50,6 @@ class User extends Authenticatable implements HasLocalePreference
     'allow_live_streaming_private',
     'price_live_streaming_private',
     'allow_dm',
-    'welcome_message_new_subs',
-    'send_welcome_message',
-    'price_welcome_message',
     'alias_mp',
     'cvu',
     'dark_mode'

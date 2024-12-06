@@ -182,8 +182,6 @@ class CardinityController extends Controller
               // Send Notification to User --- destination, author, type, target
               Notifications::send($data['id'], $data['subscriber'], '1', $data['id']);
 
-              $this->sendWelcomeMessageAction($user, $data['subscriber']);
-
               // Admin and user earnings calculation
               $earnings = $this->earningsAdminUser($user->custom_fee, $data['amount'], $payment->fee, $payment->fee_cents);
 

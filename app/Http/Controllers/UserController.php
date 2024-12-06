@@ -2128,68 +2128,9 @@ class UserController extends Controller
 
   public function updateConversations()
   {
-    $messages = [
-      'price_welcome_message.min' => __('validation.min.numeric', [
-        'attribute' => __('general.price_welcome_message'),
-        'min' => Helper::priceWithoutFormat(config('settings.min_ppv_amount'))
-      ]),
-      'price_welcome_message.max' => __('validation.max.numeric', [
-        'attribute' => __('general.price_welcome_message'),
-        'max' => Helper::priceWithoutFormat(config('settings.max_ppv_amount'))
-      ]),
-      'message.required_if' => __('validation.required'),
-    ];
-
-    $this->request->validate([
-      'price_welcome_message' => [
-        Rule::excludeIf(
-          !$this->request->price_welcome_message
-            || $this->request->price_welcome_message == 0
-            || $this->request->price_welcome_message == 0.00
-        ),
-        'numeric',
-        'min:' . config('settings.min_ppv_amount'),
-        'max:' . config('settings.max_ppv_amount')
-      ],
-      'message' => 'required_if:send_welcome_message,==,1|min:1|max:' . config('settings.comment_length') . '',
-    ], $messages);
-
     auth()->user()->update([
       'allow_dm' => $this->request->allow_dm,
-      'send_welcome_message' => $this->request->send_welcome_message,
-      'price_welcome_message' => $this->request->price_welcome_message,
-      'welcome_message_new_subs' => trim(Helper::checkTextDb($this->request->message)),
     ]);
-
-    $video = MediaWelcomeMessage::whereCreatorId(auth()->id())
-      ->whereStatus('pending')
-      ->whereType('video')
-      ->first();
-
-    if ($video && $video->encoded == 'no' && config('settings.video_encoding') == 'on') {
-      try {
-        if (config('settings.encoding_method') == 'ffmpeg') {
-          $this->dispatch(new EncodeVideoWelcomeMessage($video));
-        } else {
-          CoconutVideoService::handle($video, 'welcomeMessage');
-        }
-
-        $video->update([
-          'status' => 'encode'
-        ]);
-
-        return redirect()->back()->withEncode(true);
-      } catch (\Exception $e) {
-        return redirect()->back()
-          ->withErrors([
-            'errors' => $e->getMessage(),
-          ]);
-      }
-    } elseif ($video && config('settings.video_encoding') == 'off') {
-      $video->update([
-        'status' => 'active'
-      ]);
-    }
 
     return redirect()->back()->withStatus(__('admin.success_update'));
   }

@@ -305,8 +305,6 @@ class PayPalController extends Controller
             // Send Notification to User --- destination, author, type, target
             Notifications::send($data['id'], $data['subscriber'], '1', $data['id']);
 
-            $this->sendWelcomeMessageAction($user, $data['subscriber']);
-
             info('PayPal: Subscription created! ID: ' . $subscriptionId);
           }
 

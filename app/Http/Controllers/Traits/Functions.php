@@ -31,7 +31,6 @@ use App\Models\ReferralTransactions;
 use App\Services\CoconutVideoService;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\SendTwoFactorCode;
-use App\Actions\SendWelcomeMessageAction;
 use App\Notifications\PayPerViewReceived;
 use App\Models\LiveStreamingPrivateRequest;
 use Phattarachai\LaravelMobileDetect\Agent;
@@ -577,8 +576,6 @@ trait Functions
 		$sql->free = 'yes';
 		$sql->save();
 
-		$this->sendWelcomeMessageAction($admin, $user);
-
 		if ($admin->notify_new_subscriber == 'yes') {
 			// Send Notification to User --- destination, author, type, target
 			Notifications::send($admin->id, $user, '1', $admin->id);
@@ -721,11 +718,6 @@ trait Functions
 		$live->transaction->update([
 			'approved' => '2'
 		]);
-	}
-
-	public function sendWelcomeMessageAction($creator, $userId)
-	{
-		(new SendWelcomeMessageAction())->execute($creator, $userId);
 	}
 
 	public function uploadMediaFileMsg($request, $msgId, $type = 'zip')

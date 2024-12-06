@@ -200,8 +200,6 @@ class CCBillController extends Controller
             $subscription->interval = $plan->interval;
             $subscription->save();
 
-            $this->sendWelcomeMessageAction($creator, $userID);
-
             // Send Notification
             if ($creator->notify_new_subscriber == 'yes') {
               Notifications::send($creator->id, $userID, 1, $userID);

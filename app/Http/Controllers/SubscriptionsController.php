@@ -141,8 +141,6 @@ class SubscriptionsController extends Controller
     // Send Email to User and Notification
     Subscriptions::sendEmailAndNotify(auth()->user()->name, $creator->id);
 
-    $this->sendWelcomeMessageAction($creator, auth()->id());
-
     return response()->json([
       'success' => true,
     ]);
@@ -245,8 +243,6 @@ class SubscriptionsController extends Controller
 
     // Send Email to User and Notification
     Subscriptions::sendEmailAndNotify(auth()->user()->name, $creator->id);
-
-    $this->sendWelcomeMessageAction($creator, auth()->id());
 
     return response()->json([
       'success' => true,

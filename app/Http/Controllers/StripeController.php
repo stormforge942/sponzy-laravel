@@ -100,8 +100,6 @@ class StripeController extends Controller
       // Send Email to User and Notification
       Subscriptions::sendEmailAndNotify(auth()->user()->name, $user->id);
 
-      $this->sendWelcomeMessageAction($user, auth()->id());
-
       return response()->json([
         'success' => true,
         'url' => url('buy/subscription/success', $user->username)
