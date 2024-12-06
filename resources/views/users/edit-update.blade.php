@@ -48,7 +48,7 @@
             <div class="card-footer bg-white border-0 pt-0 rounded-large">
               <div class="justify-content-between align-items-center">
 
-                <div class="form-group @if ($data->price == 0.00) display-none @endif" id="price" >
+                <div class="form-group" id="price" >
                   <div class="input-group mb-2">
                   <div class="input-group-prepend">
                     <span class="input-group-text">{{$settings->currency_symbol}}</span>
@@ -126,14 +126,6 @@
                   <button type="button" id="setPrice" class="btn btn-upload btn-tooltip e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.price_post_ppv')}}">
                     <i class="feather icon-tag f-size-20 align-bottom"></i>
                   </button>
-                @endif
-
-                @if ($data->price == 0.00)
-                  @if (!$settings->disable_free_post)
-                  <button type="button" id="contentLocked" class="btn e-none align-bottom @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill btn-upload btn-tooltip {{$data->locked == 'yes' ? '' : 'unlock'}}" data-toggle="tooltip" data-placement="top" title="{{__('users.locked_content')}}">
-                    <i class="feather icon-{{$data->locked == 'yes' ? '' : 'un'}}lock f-size-20 align-bottom"></i>
-                  </button>
-                  @endif
                 @endif
 
               @if (!$mediaCount && $data->locked == 'yes')

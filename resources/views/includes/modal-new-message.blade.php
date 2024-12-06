@@ -80,7 +80,7 @@
 
 					<div class="progress-upload-cover" style="width: 0%; top:0;"></div>
 
-					<div class="form-group display-none mt-2" id="price">
+					<div class="form-group mt-2" id="price">
 						<div class="input-group mb-2">
 						<div class="input-group-prepend">
 							<span class="input-group-text">{{$settings->currency_symbol}}</span>

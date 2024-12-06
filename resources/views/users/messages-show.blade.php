@@ -162,7 +162,7 @@
               <textarea class="form-control textareaAutoSize emojiArea border-0" data-post-length="{{$settings->update_length}}" rows="1" placeholder="{{__('general.write_something')}}" id="message" name="message"></textarea>
             </div>
 
-            <div class="form-group display-none mt-2" id="price">
+            <div class="form-group mt-2" id="price">
               <div class="input-group mb-2">
               <div class="input-group-prepend">
                 <span class="input-group-text">{{$settings->currency_symbol}}</span>

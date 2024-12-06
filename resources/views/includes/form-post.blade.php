@@ -46,12 +46,12 @@
         <div class="card-footer bg-white border-0 pt-0 rounded-large">
           <div class="justify-content-between align-items-center">
 
-            <div class="form-group display-none" id="price" >
+            <div class="form-group" id="price" >
               <div class="input-group mb-2">
               <div class="input-group-prepend">
                 <span class="input-group-text">{{$settings->currency_symbol}}</span>
               </div>
-                  <input class="form-control isNumber" autocomplete="off" name="price" placeholder="{{__('general.price')}}" type="text">
+                  <input class="form-control isNumber" autocomplete="off" name="price" placeholder="{{__('general.price')}}" type="text" required>
               </div>
             </div><!-- End form-group -->
 
@@ -102,12 +102,6 @@
             <button type="button" id="setPrice" class="btn btn-post btn-tooltip-form e-none @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill" data-toggle="tooltip" data-placement="top" title="{{__('general.price_post_ppv')}}">
               <i class="feather icon-tag f-size-20 align-bottom"></i>
             </button>
-
-            @if (!$settings->disable_free_post)
-            <button type="button" id="contentLocked" class="btn btn-post btn-tooltip-form e-none @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill {{auth()->user()->post_locked == 'yes' ? '' : 'unlock'}}" data-toggle="tooltip" data-placement="top" title="{{__('users.locked_content')}}">
-              <i class="feather icon-{{auth()->user()->post_locked == 'yes' ? '' : 'un'}}lock f-size-20 align-bottom"></i>
-            </button>
-            @endif
 
             @if ($settings->live_streaming_status == 'on')
               <button type="button" data-toggle="tooltip" data-placement="top" title="{{__('general.stream_live')}}" class="btn btn-post p-bottom-8 btn-tooltip-form e-none btnCreateLive @if (auth()->user()->dark_mode == 'off') text-primary @else text-white @endif rounded-pill">

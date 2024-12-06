@@ -86,7 +86,7 @@ class UpdatesController extends Controller
       'description' => 'required|min:1|max:' . $this->settings->update_length . '',
       '_description' => 'required_if:_isVideoEmbed,==,yes|min:1|max:' . $this->settings->update_length . '',
       'title'       => 'max:100',
-      'price'       => 'numeric|min:' . $this->settings->min_ppv_amount . '|max:' . $this->settings->max_ppv_amount,
+      'price'       => 'required|numeric|min:1|max:' . $this->settings->max_ppv_amount,
     ], $messages);
 
     if ($validator->fails()) {
@@ -114,7 +114,7 @@ class UpdatesController extends Controller
     $post->user_id      = auth()->id();
     $post->date         = Carbon::now();
     $post->token_id     = Str::random(150);
-    $post->locked       = $this->settings->disable_free_post ? 'yes' : $locked;
+    $post->locked       = 'yes';
     $post->price        = $this->request->price;
     $post->status       = $this->settings->auto_approve_post == 'on' ? $statusPost : 'pending';
     $post->schedule     = $this->request->scheduled_date ? true : false;
@@ -337,7 +337,7 @@ class UpdatesController extends Controller
       'epub'         => 'mimes:epub,zip|max:' . $this->settings->file_size_allowed . '',
       'description'  => 'required|min:1|max:' . $this->settings->update_length . '',
       '_description' => 'required_if:_isVideoEmbed,==,yes|min:1|max:' . $this->settings->update_length . '',
-      'price'       => 'required_if:is_ppv,==,yes|numeric|min:' . $this->settings->min_ppv_amount . '|max:' . $this->settings->max_ppv_amount,
+      'price'       => 'required|numeric|min:1|max:' . $this->settings->max_ppv_amount,
       'title'       => 'max:100',
 
     ], $messages);
@@ -362,7 +362,7 @@ class UpdatesController extends Controller
     $post->title        = $this->request->locked == 'yes' && !$getAllMedia && !$this->request->hasFile('zip') && !$this->request->hasFile('epub') ? $this->request->title : null;
     $post->user_id      = auth()->id();
     $post->token_id     = Str::random(150);
-    $post->locked       = $this->settings->disable_free_post ? 'yes' : $this->request->locked;
+    $post->locked       = 'yes';
     $post->price        = $this->request->price;
     $post->save();
 
