@@ -11,7 +11,7 @@
 								<small data-dismiss="modal" class="btn-cancel-msg"><i class="bi bi-x-lg"></i></small>
 							</h5>
 
-							@if (auth()->user()->verified_id == 'yes' && request()->is('messages') && auth()->user()->totalSubscriptionsActive() > 1)
+							@if (auth()->user()->verified_id == 'yes' && request()->is('messages'))
 								<span class="form-text">
 									<a href="javascript:void(0);" data-toggle="modal" data-target="#newMessageMassive" data-dismiss="modal" class="btn btn-primary btn-sm w-100 mt-2">
 										<i class="feather icon-users"></i> {{ __('general.to_all_my_subscribers') }}

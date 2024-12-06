@@ -220,23 +220,9 @@
                       </tr>
                       @endforeach
 
-                      @if ($subscriptions->isEmpty())
-                      <tr>
-                        <td colspan="12" class="text-center">{{ __('users.not_subscribers') }}</td>
-                      </tr>
-                      @endif
-
                     </tbody>
                   </table>
                 </div>
-
-                @if ($subscriptions->isNotEmpty())
-                <div class="card-footer">
-                  <a href="{{ url('my/subscribers') }}" class="text-muted font-weight-medium d-flex align-items-center justify-content-center arrow">
-                    {{ __('general.view_all') }}
-                  </a>
-                </div>
-                @endif
               </div><!-- card -->
             </div><!-- end col-md-6 -->
 

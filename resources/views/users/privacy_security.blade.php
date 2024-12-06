@@ -106,13 +106,6 @@
 
                 <div class="btn-block mb-4">
                   <div class="custom-control custom-switch custom-switch-lg">
-                    <input type="checkbox" class="custom-control-input" name="hide_count_subscribers" value="yes" @if (auth()->user()->hide_count_subscribers == 'yes') checked @endif id="customSwitch3">
-                    <label class="custom-control-label switch" for="customSwitch3">{{ __('general.hide_count_subscribers') }}</label>
-                  </div>
-                </div>
-
-                <div class="btn-block mb-4">
-                  <div class="custom-control custom-switch custom-switch-lg">
                     <input type="checkbox" class="custom-control-input" name="hide_my_country" value="yes" @if (auth()->user()->hide_my_country == 'yes') checked @endif id="customSwitch4">
                     <label class="custom-control-label switch" for="customSwitch4">{{ __('general.hide_my_country') }}</label>
                   </div>

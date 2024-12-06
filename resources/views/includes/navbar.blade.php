@@ -181,17 +181,6 @@
 					</li>
 				@endif
 
-				@if (auth()->user()->verified_id == 'yes')
-				<li class="nav-item dropdown d-lg-none">
-					<a href="{{url('my/subscribers')}}" class="nav-link px-2 link-menu-mobile py-1">
-						<div>
-							<i class="feather icon-users mr-2"></i>
-							<span class="d-lg-none">{{ __('users.my_subscribers') }}</span>
-						</div>
-					</a>
-				</li>
-				@endif
-
 					<li class="nav-item dropdown d-lg-none border-bottom">
 						<a href="{{url('my/purchases')}}" class="nav-link px-2 link-menu-mobile py-1">
 							<div>
@@ -326,9 +315,6 @@
 					@endif
 
 					<div class="dropdown-divider"></div>
-						@if (auth()->user()->verified_id == 'yes')
-						<a class="dropdown-item dropdown-navbar" href="{{url('my/subscribers')}}"><i class="feather icon-users mr-2"></i> {{__('users.my_subscribers')}}</a>
-					@endif
 						<a class="dropdown-item dropdown-navbar" href="{{url('my/bookmarks')}}"><i class="feather icon-bookmark mr-2"></i> {{__('general.bookmarks')}}</a>
 						<a class="dropdown-item dropdown-navbar" href="{{url('my/likes')}}"><i class="feather icon-heart mr-2"></i> {{__('general.likes')}}</a>
 
